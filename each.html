@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Loop test</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+</head>
+<body>
+
+<ul>
+	<li data-loop="json_data as key, value">
+		<b>{{value.id}} -> {{value.name}}</b>
+	</li>
+</ul>
+
+<br />
+<ul>
+	<li data-loop="json_data1 as k, v">
+		<b>{{v.id}} -> {{v.name}}</b>
+	</li>
+</ul>
+
+</body>
+
+<script type="text/javascript">
+	
+	json_data = [ { id : 1, name : "test" }, { id : 2, name : "peji" } ];
+	json_data1 = [ { id : 1, name : "test111" }, { id : 2, name : "pejman" } ];
+
+	$("*[data-loop]").each(function() {
+		split = $(this).data('loop').split("as");
+		loop_name = $.trim( split[0] );
+		var sp_kv = split[1].split(",");
+		key_name = $.trim( sp_kv[0] );
+		value_name = $.trim( sp_kv[1] );
+
+		for( x in window[ loop_name ] ) {
+			var html = $(this).html();
+			window[ key_name ] = x;
+			window[ value_name ] = window[ loop_name ][x];
+
+			var match = $(this).text().match( /\{\{(.*?)\}\}/ig );
+			for( d in match ) {
+				vname = match[d].replace("{{", "").replace("}}", "");
+
+				splt = vname.split(".");
+				val = window[ $.trim( splt[0] ) ];
+				if( splt[1] !== "" ) {
+					val = val[ $.trim( splt[1] ) ];
+				}
+
+				html = html.replace( match[d], val );
+			}
+
+			var clone = $(this).clone( false );
+			clone.removeAttr('data-loop').html( html );
+			$(this).after( clone );
+
+		}
+
+		$(this).remove();
+
+	});
+</script>
+</html>
